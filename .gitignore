@@ -106,3 +106,8 @@ venv.bak/
 # image data
 images/
 test/
+
+#dump data
+.pickle
+.h5
+.hdf5
