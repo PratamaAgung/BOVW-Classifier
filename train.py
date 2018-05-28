@@ -24,6 +24,10 @@ if __name__ == "__main__":
     extractor = None
     if (args['feature'].lower() == 'sift'):
         extractor = cv2.xfeatures2d.SIFT_create()
+    elif (args['feature'].lower() == 'kaze'):
+        extractor = cv2.KAZE_create()
+    elif (args['feature'].lower() == 'orb'):
+        extractor = cv2.ORB_create()
     else:
         sys.exit()
 
@@ -49,5 +53,5 @@ if __name__ == "__main__":
     classifier.fit(preprocessed_image, target)
     print("Time to learn: %s " % (time.time() - start))
 
-    with open("model_" + args['model'].lower() + ".pickle", "wb") as handle:
+    with open("model_" + args['model'].lower() + '_' + args['feature'].lower() + '_' + args['cluster'].lower() + ".pickle", "wb") as handle:
         pickle.dump(classifier,handle)

@@ -15,15 +15,21 @@ if __name__ == '__main__':
     images = utility.open_image_folder(os.getcwd() + "/test")
     if (args['cluster'] is not None and args['feature'] is not None and args['model'] is not None):
         with open("codebook_" + args['feature'].lower() + '_' + args['cluster'].lower() + ".pickle", 'rb')  as handle_codebook, \
-        open("model_" + args['model'].lower() + ".pickle", "rb") as handle_model:
+        open("model_" + args['model'].lower() + '_' + args['feature'].lower() + '_' + args['cluster'].lower() + ".pickle", "rb") as handle_model:
             cluster_alg = pickle.load(handle_codebook)
             classifier = pickle.load(handle_model)
     else:
         sys.exit()
 
     extractor = None
-    if (args['feature'] == 'sift'):
+    if (args['feature'].lower() == 'sift'):
         extractor = cv2.xfeatures2d.SIFT_create()
+    elif (args['feature'].lower() == 'kaze'):
+        extractor = cv2.KAZE_create()
+    elif (args['feature'].lower() == 'orb'):
+        extractor = cv2.ORB_create()
+    else:
+        sys.exit()
 
     for key in images:
         print(key)
