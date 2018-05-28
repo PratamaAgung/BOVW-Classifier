@@ -1,19 +1,41 @@
 import pickle
 import utility
 import os
+import sys
 import cv2
 from sklearn.neural_network import MLPClassifier
 import time
+import argparse
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Train model with previously generated codebook")
+    parser.add_argument('-c', '--cluster', help="Clustering strategy", required=True)
+    parser.add_argument('-f', '--feature', help="Extract feature strategy", required=True)
+    parser.add_argument('-m', '--model', help="Model generated", required=True)
+    args = vars(parser.parse_args())
+
     cluster_model = None
-    with open("codebook.pickle", 'rb') as handle:
-        cluster_model = pickle.load(handle)
+    if (args['feature'] is not None and args['cluster'] is not None):
+        with open("codebook_" + args['feature'].lower() + '_' + args['cluster'].lower() + ".pickle", 'rb') as handle:
+            cluster_model = pickle.load(handle)
+    else:
+        sys.exit()
+
+    extractor = None
+    if (args['feature'].lower() == 'sift'):
+        extractor = cv2.xfeatures2d.SIFT_create()
+    else:
+        sys.exit()
+
+    classifier = None
+    if (args['model'].lower() == 'mlp'):
+        classifier = MLPClassifier(batch_size=30)
+    else:
+        sys.exit()
 
     data_images = utility.open_image_folder(os.getcwd() + "/images")
     preprocessed_image = []
     target = []
-    extractor = cv2.xfeatures2d.SIFT_create()
     for key in data_images:
         for image in data_images[key]:
             image = utility.gray(image)
@@ -22,11 +44,10 @@ if __name__ == "__main__":
             preprocessed_image.append(histogram)
             target.append(key)
 
-    classifier = MLPClassifier(batch_size=30)
     print("Start learning...")
     start = time.time()
     classifier.fit(preprocessed_image, target)
     print("Time to learn: %s " % (time.time() - start))
 
-    with open("model.pickle", "wb") as handle:
+    with open("model_" + args['model'].lower() + ".pickle", "wb") as handle:
         pickle.dump(classifier,handle)
